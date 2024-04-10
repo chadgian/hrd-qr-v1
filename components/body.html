@@ -1,0 +1,128 @@
+<div class="container-lg p2" id="trainings">
+
+</div>
+
+<script>
+  $(document).ready(function(){
+    function fetchData() {
+        $.ajax({
+            url: '../processes/getTrainingLists.php',
+            type: 'GET',
+            success: function(data) {
+                // $('#trainings').html(data);
+                displayTrainings(JSON.parse(data));
+            }
+        });
+    }
+
+    function displayTrainings(trainingData){
+      const trainingSection = document.getElementById('trainings');
+
+      // create a parent accordion and append later
+      const parentAccordion = document.createElement('div');
+      parentAccordion.classList = "accordion"; // set the class as an accordion for bootstrap
+      parentAccordion.setAttribute("id", "accordionPanel"); // set id for later preference
+
+      var counter = 0;
+      trainingData.forEach(function(element) {
+        console.log(element.Training + " - " + element.Date);
+        // create a div with class accordion-item
+
+        const trainingDate = element.Date.replace(/\s+/g, '-');
+        
+        if (counter === 0){
+          const accordionItem = document.createElement("div");
+          accordionItem.classList = "accordion-item";
+
+          // create h2 element for the accordion header
+          const heading = document.createElement("h2");
+          heading.classList = "accordion-header";
+          const headingButton = document.createElement("button");
+          headingButton.classList = "accordion-button fs-5 fw-bold";
+          headingButton.type = "button";
+          headingButton.setAttribute("data-bs-toggle", "collapse");
+          headingButton.setAttribute("data-bs-target", "#"+trainingDate);
+          headingButton.setAttribute("aria-expanded", "true");
+          headingButton.setAttribute("aria-controls", trainingDate);
+          headingButton.innerHTML = element.Date;
+          heading.appendChild(headingButton);
+          accordionItem.appendChild(heading);
+
+          // create a div to hold the collapsible content
+          const collapseItem = document.createElement('div'); 
+          collapseItem.classList = "accordion-collapse collapse show";
+          collapseItem.setAttribute("id", trainingDate);
+
+          // create accordion body 
+          const accordionBody = document.createElement("div");
+          accordionBody.classList = "accordion-body";
+          accordionBody.setAttribute("id", trainingDate+"-body");
+
+          const accordionBodyContent = document.createElement('a');
+          accordionBodyContent.href = "viewTraining.php?id="+element.ID;
+          accordionBodyContent.classList = "body-content text-dark";
+          accordionBodyContent.innerHTML = "<p class='fw-bold'>"+element.Training+"</p><hr>";
+          accordionBody.appendChild(accordionBodyContent);
+
+          collapseItem.appendChild(accordionBody);
+          accordionItem.appendChild(collapseItem);
+          parentAccordion.appendChild(accordionItem);
+          trainingSection.appendChild(parentAccordion);
+        } else {
+          if(document.getElementById(trainingDate) == null){
+            const accordionItem = document.createElement("div");
+            accordionItem.classList = "accordion-item";
+
+            // create h2 element for the accordion header
+            const heading = document.createElement("h2");
+            heading.classList = "accordion-header";
+            const headingButton = document.createElement("button");
+            headingButton.classList = "accordion-button collapsed fs-5 fw-bold";
+            headingButton.type = "button";
+            headingButton.setAttribute("data-bs-toggle", "collapse");
+            headingButton.setAttribute("data-bs-target", "#"+trainingDate);
+            headingButton.setAttribute("aria-expanded", "false");
+            headingButton.setAttribute("aria-controls", trainingDate);
+            headingButton.innerHTML = element.Date;
+            heading.appendChild(headingButton);
+            accordionItem.appendChild(heading);
+
+            // create a div to hold the collapsible content
+            const collapseItem = document.createElement('div');
+            collapseItem.classList = "accordion-collapse collapse";
+            collapseItem.setAttribute("id", trainingDate);
+
+            // create accordion body 
+            const accordionBody = document.createElement("div");
+            accordionBody.classList = "accordion-body";
+            accordionBody.setAttribute("id", trainingDate+"-body");
+            
+            const accordionBodyContent = document.createElement('a');
+            accordionBodyContent.href = "viewTraining.php?id="+element.ID;
+            accordionBodyContent.classList = "body-content text-dark";
+            accordionBodyContent.innerHTML = "<p class='fw-bold'>"+element.Training+"</p><hr>";
+            accordionBody.appendChild(accordionBodyContent);
+
+            collapseItem.appendChild(accordionBody);
+            accordionItem.appendChild(collapseItem);
+            parentAccordion.appendChild(accordionItem);
+            trainingSection.appendChild(parentAccordion);
+          } 
+          else {
+          const monthAccordion = document.getElementById(trainingDate+"-body");
+
+          const accordionBodyContent = document.createElement('a');
+          accordionBodyContent.href = "viewTraining.php?id="+element.ID;
+          accordionBodyContent.classList = "body-content text-dark";
+          accordionBodyContent.innerHTML = "<p class='fw-bold'>"+element.Training+"</p><hr>";
+          monthAccordion.appendChild(accordionBodyContent);
+
+        }
+        }
+        counter++;
+      });
+    }
+    // Initial fetch
+    fetchData();
+  });
+</script>
