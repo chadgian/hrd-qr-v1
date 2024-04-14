@@ -126,6 +126,18 @@
 	
 
 	<div class="container">
+		<h2 class="text-center fw-bold"><?php 
+			require '../processes/db_connection.php';
+
+			$stmt = $conn->prepare("SELECT * FROM trainings WHERE training_id = ?");
+			$stmt->bind_param('s', $trainingID);
+			$stmt->execute();
+			$result = $stmt->get_result();
+			$data = $result->fetch_assoc();
+
+			$trainingName = $data['training_name'];
+			echo $trainingName; ?>
+		</h2>
 		<form action="../processes/attendanceProcess.php" method="post">
 			<div class="section">
 				<?php
@@ -134,18 +146,13 @@
 						<input type='hidden' value='$trainingDay' name='days'>
 						<input type='hidden' value='$trainingInORout' name='inORout'>
 					";
-
-					require '../processes/db_connection.php';
-
-					$stmt = $conn->prepare("SELECT * FROM trainings WHERE training_id = ?");
-					$stmt->bind_param('s', $trainingID);
-					$stmt->execute();
-					$result = $stmt->get_result();
-					$data = $result->fetch_assoc();
-
-					$trainingName = $data['training_name'];
 				?>
-				<h2 style="text-align: center;"><?php echo $trainingName; ?></h2>
+				<h2 class="text-center">
+					<?php 
+						$scanStatus = $trainingInORout == "in" ? "Login" : "Logout";
+						echo "Day $trainingDay - $scanStatus";
+					?>
+				</h2>
 				<div id="my-qr-reader">
 				</div><br>
 				<div class="scanResult">
