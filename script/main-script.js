@@ -40,6 +40,7 @@ domReady(function () {
 			
 					if (trainingID !== scannedTrainingID){
 						alert("Wrong training!");
+						qrCodeScanned = false;
 					} else {
 
 						var audio = new Audio('../sources/success.wav');
