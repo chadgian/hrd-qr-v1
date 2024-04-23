@@ -2,9 +2,9 @@
     // online mySql hosting at https://www.freemysqlhosting.net/
 
     $servername = "sql6.freemysqlhosting.net";
-    $username = "sql6701161";
-    $password = "3pQCsnk3BA";
-    $database = "sql6701161";
+    $username = "sql6701218";
+    $password = "6W1lbwlUCR";
+    $database = "sql6701218";
 
     $conn = new mysqli($servername, $username, $password, $database);
 
