@@ -1,8 +1,10 @@
 <?php
-    $servername = "localhost";
-    $username = "root";
-    $password = ""; // This might be empty or your MySQL root password
-    $database = "qr_attendance_db";
+    // online mySql hosting at https://www.freemysqlhosting.net/
+
+    $servername = "sql6.freemysqlhosting.net";
+    $username = "sql6701161";
+    $password = "3pQCsnk3BA"; // This might be empty or your MySQL root password
+    $database = "sql6701161";
 
     $conn = new mysqli($servername, $username, $password, $database);
 
