@@ -19,63 +19,6 @@
       </tr>
     </thead>
     <tbody id="table-body">
-      <?php
-        $trainingTable = "training-$trainingID-$day";
-
-        $stmtAttendance = $conn->prepare("SELECT * FROM `$trainingTable`");
-        $stmtAttendance->execute();
-        $resultAttendance = $stmtAttendance->get_result();
-
-        $latestLogin = 0;
-        $latestLogout = 0;
-
-        if($resultAttendance -> num_rows > 0){
-            while ($data0 = $resultAttendance->fetch_assoc()){
-                $logout = $data0['logout'];
-                $login = $data0['login'];
-
-                if ($login > $latestLogin){
-                    $latestLogin = $login;
-                }
-
-                if ($logout > $latestLogout){
-                    $latestLogout = $logout;
-                }
-            }
-        }
-
-        if ($latestLogin > $latestLogout){
-            $stmt1 = $conn->prepare("SELECT * FROM `$trainingTable` ORDER BY login DESC");
-        } else {
-            $stmt1 = $conn->prepare("SELECT * FROM `$trainingTable` ORDER BY logout DESC");
-        }
-
-        if ($stmt1->execute()){
-          $result1 = $stmt1->get_result();
-          if($result1 -> num_rows > 0){
-              while ($data1 = $result1->fetch_assoc()){
-                  $lastname = $data1['lastname'];
-                  $firstname = $data1['firstname'];
-                  $middleinitial = $data1['middle_initial'];
-                  $agency = $data1['agency'];
-                  $login = ($data1['login'] != null) ? date("H:i", strtotime($data1['login'])) : "";
-                  $logout = ($data1['logout'] != null) ? date("H:i", strtotime($data1['logout'])) : "";
-
-                  echo "
-                  <tr>
-                    <td><div class='d-flex flex-column text-center'><p class='fw-bold my-0 py-0'>$lastname</p><p class='text-muted my-0 py-0'>$firstname $middleinitial</p></div></td>
-                    <td class='text-center'>$agency</td>
-                    <td class='text-center'>$login</td>
-                    <td class='text-center'>$logout</td>
-                  </tr>";
-              }
-          } else {
-              echo "<i>No participants</i>";
-          }
-        } else {
-            echo $stmt1->error;
-        }
-      ?>
     </tbody>
   </table>
 </div>

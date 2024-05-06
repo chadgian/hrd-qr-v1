@@ -47,13 +47,15 @@
                         <th class='text-center'>Sign Out</th>
                     </tr>";
                 while ($data1 = $result1->fetch_assoc()){
-                    $name = $data1['lastname'];
+                    $lastname = $data1['lastname'];
+                    $firstname = $data1['firstname'];
+                    $middleinitial = $data1['middle_initial'];
                     $participantID = $data1['participant_id'];
                     $login = ($data1['login'] != null) ? date("H:i", strtotime($data1['login'])) : "";
                     $logout = ($data1['logout'] != null) ? date("H:i", strtotime($data1['logout'])) : "";
                     echo "<tr>";
                     echo "<td class='text-center'>$participantID</td>";
-                    echo "<td class='text-center'>$name</td>";
+                    echo "<td class='text-center'><div class='d-flex flex-column text-center'><p class='fw-bold my-0 py-0'>$lastname</p><p class='text-muted my-0 py-0'>$firstname $middleinitial</p></div></td>";
                     echo "<td  class='text-center'>$login</td>";
                     echo "<td  class='text-center'>$logout</td></tr>";
                 }

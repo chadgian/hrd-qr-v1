@@ -33,7 +33,8 @@ function setStatus(status){
 			statusElement.innerHTML = 'Recording data...';
 		break;
 		default:
-			break;
+			statusElement.innerHTML = 'Error. Refresh the page.';        
+		break;
 	}
 }
 
@@ -95,7 +96,7 @@ domReady(function () {
 						const recordStatus = await fetchRecordData.text();
 
 						if (recordStatus === "success"){
-							var audio = new Audio('../sources/success.mp3');
+							var audio = new Audio('../sources/success.wav');
 							audio.play();
 							setStatus("ready");
 							qrCodeScanned = false;
