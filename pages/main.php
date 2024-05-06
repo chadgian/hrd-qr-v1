@@ -9,11 +9,11 @@
         $result=$stmt->get_result();
 
         if($result->num_rows <= 0){
-            header('Location: index.php');
+            header('Location: ../index.php');
             exit();
         }
     } else {
-        header('Location: index.php');
+        header('Location: ../index.php');
         exit();
     }
 ?>

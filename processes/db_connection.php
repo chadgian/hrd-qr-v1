@@ -1,10 +1,8 @@
 <?php
-    // online mySql hosting at https://www.freemysqlhosting.net/
-
-    $servername = "sql6.freemysqlhosting.net";
-    $username = "sql6701218";
-    $password = "6W1lbwlUCR";
-    $database = "sql6701218";
+    $servername = "localhost";
+    $username = "root";
+    $password = ""; // This might be empty or your MySQL root password
+    $database = "qr_attendance_db";
 
     $conn = new mysqli($servername, $username, $password, $database);
 

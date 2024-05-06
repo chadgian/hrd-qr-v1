@@ -143,16 +143,17 @@
 				<?php
 					echo "
 						<input type='hidden' value='$trainingID' name='training' id='training'>
-						<input type='hidden' value='$trainingDay' name='days'>
-						<input type='hidden' value='$trainingInORout' name='inORout'>
+						<input type='hidden' value='$trainingDay' name='days' id='days'>
+						<input type='hidden' value='$trainingInORout' name='inORout' id='inORout'>
 					";
 				?>
-				<h2 class="text-center">
+				<p class="text-center">
 					<?php 
 						$scanStatus = $trainingInORout == "in" ? "Login" : "Logout";
 						echo "Day $trainingDay - $scanStatus";
 					?>
-				</h2>
+				</p>
+				<h2 id='status' class="text-center"></h2>
 				<div id="my-qr-reader">
 				</div><br>
 				<div class="scanResult">

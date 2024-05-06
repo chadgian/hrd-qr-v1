@@ -28,8 +28,8 @@
                 firstname VARCHAR(100) NOT NULL,
                 middle_initial VARCHAR(100) NULL,
                 agency VARCHAR(100),
-                login TIME NULL DEFAULT NULL,
-                logout TIME NULL DEFAULT NULL
+                login TIME(6) NULL DEFAULT NULL,
+                logout TIME(6) NULL DEFAULT NULL
 
             )");
 

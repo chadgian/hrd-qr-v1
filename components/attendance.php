@@ -90,4 +90,30 @@
 
   // Set the calculated height to the element
   element.style.height = heightFromTop + "px";
+
+  $(document).ready(function(){
+  // Function to fetch and display data from the server
+  var trainingID = <?php echo json_encode($trainingID); ?>;
+  var day = <?php echo json_encode($day); ?>;
+
+  function fetchData() {
+      $.ajax({
+          url: '../processes/fetchAttendance.php',
+          type: 'GET',
+          data:{
+              id: trainingID, 
+              days: day
+          },
+          success: function(data) {
+              $('#attendance-table').html(data);
+          }
+      });
+  }
+  
+  // Initial fetch
+  fetchData();
+  
+  // Set interval to fetch data every 1 seconds
+  setInterval(fetchData, 1000);
+});
 </script>

@@ -1,9 +1,17 @@
 <?php
     session_start();
+    include_once 'processes/db_connection.php';
 
     if (isset($_SESSION['username'])) {
-        header('Location: pages/main.php');
-        exit();
+        $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
+        $stmt->bind_param("s", $_SESSION['username']);
+        $stmt->execute();
+        $result=$stmt->get_result();
+
+        if($result->num_rows > 0){
+            header('Location: pages/main.php');
+            exit();
+        }
     }
 ?>
 

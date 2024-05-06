@@ -15,4 +15,6 @@
     }
 
     echo $decrypted;
+
+    // include 'attendanceProcess.php';
 ?>
