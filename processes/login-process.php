@@ -16,16 +16,14 @@ if ($result->num_rows > 0) {
     session_start();
     $_SESSION['username'] = $user['username'];
     $_SESSION['password'] = $user['password'];
-    
-    header('Location: ../pages/main.php');
-    exit();
 
+    header('Location: ../pages/main.php');
 } else {
     $loginError = "Wrong username or password!";
     header('Location: ../index.php?error=' . urlencode($loginError));
-    exit();
 }
 
 $stmt->close();
 $conn->close();
+exit();
 ?>

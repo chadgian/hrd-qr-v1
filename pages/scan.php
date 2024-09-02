@@ -1,35 +1,47 @@
 <?php
-    session_start();
+session_start();
+include_once '../processes/db_connection.php';
 
-    if (!isset($_SESSION['username'])) {
-        header('Location: index.php');
-        exit();
-    }
+if (isset($_SESSION['username'])) {
+	$stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
+	$stmt->bind_param("s", $_SESSION['username']);
+	$stmt->execute();
+	$result = $stmt->get_result();
 
-		if($_SERVER["REQUEST_METHOD"] == 'POST'){
-			$_SESSION['trainingID'] = $_POST['training'];
-			$_SESSION['days'] = $_POST['days'];
-			$_SESSION['inORout'] = $_POST['inORout'];
+	if ($result->num_rows <= 0) {
+		header('Location: ../index.php');
+		exit();
+	}
+} else {
+	header('Location: ../index.php');
+	exit();
+}
 
-			$trainingID = $_SESSION['trainingID'];
-			$trainingDay = $_SESSION['days'];
-			$trainingInORout = $_SESSION['inORout'];
-		} else {
-			$trainingID = $_SESSION['trainingID'];
-			$trainingDay = $_SESSION['days'];
-			$trainingInORout = $_SESSION['inORout'];
-		}
+if ($_SERVER["REQUEST_METHOD"] == 'POST') {
+	$_SESSION['trainingID'] = $_POST['training'];
+	$_SESSION['days'] = $_POST['days'];
+	$_SESSION['inORout'] = $_POST['inORout'];
+
+	$trainingID = $_SESSION['trainingID'];
+	$trainingDay = $_SESSION['days'];
+	$trainingInORout = $_SESSION['inORout'];
+} else {
+	$trainingID = $_SESSION['trainingID'];
+	$trainingDay = $_SESSION['days'];
+	$trainingInORout = $_SESSION['inORout'];
+}
 ?>
 <html lang="en">
 
 <head>
-<meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Training Attendance</title>
-  <!-- Bootstrap CSS and Javascript-->
-  <link rel="stylesheet" href="../css/css-bootstrap/bootstrap.min.css">
-  <script src="../script/js-bootstrap/bootstrap.min.js"></script>
-  <script src="../script/jquery-3.6.0.min.js"></script>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Training Attendance</title>
+	<!-- Bootstrap CSS and Javascript-->
+	<link rel="stylesheet" href="../css/css-bootstrap/bootstrap.min.css">
+	<link href="../icon/favicon.ico" rel="icon" type="image/png" />
+	<script src="../script/js-bootstrap/bootstrap.min.js"></script>
+	<script src="../script/jquery-3.6.0.min.js"></script>
 	<style>
 		#html5-qrcode-button-camera-start {
 			background-color: #EF4B4C;
@@ -105,52 +117,55 @@
 </head>
 
 <body>
-	<header class="d-flex align-items-center py-2 px-3 sticky-top justify-content-between mb-4" style="background-color: #D0D0D0; height: 5rem;">
-    <div>
-      <img src="../src/img/csc-logo.png" alt="CSC Logo" width="60">
-    </div>
-    <div class="d-flex flex-column align-items-center">
-      <a href="../index.php" class="text-dark d-flex flex-column align-items-center" style="text-decoration: none;">
-        <h1>Training</h1>
-        <h6>Attendance</h6>
-      </a>
-    </div>
-    <div>
-      <a class="btn" href="viewTraining.php?<?php echo "id=$trainingID"; ?>">
-				<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-arrow-return-left" viewBox="0 0 16 16">
-					<path fill-rule="evenodd" d="M14.5 1.5a.5.5 0 0 1 .5.5v4.8a2.5 2.5 0 0 1-2.5 2.5H2.707l3.347 3.346a.5.5 0 0 1-.708.708l-4.2-4.2a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 8.3H12.5A1.5 1.5 0 0 0 14 6.8V2a.5.5 0 0 1 .5-.5"/>
+	<header class="d-flex align-items-center py-2 px-3 sticky-top justify-content-between mb-4"
+		style="background-color: #D0D0D0; height: 5rem;">
+		<div>
+			<img src="../src/img/csc-logo.png" alt="CSC Logo" width="60">
+		</div>
+		<div class="d-flex flex-column align-items-center">
+			<a href="../index.php" class="text-dark d-flex flex-column align-items-center" style="text-decoration: none;">
+				<h1>Training</h1>
+				<h6>Attendance</h6>
+			</a>
+		</div>
+		<div>
+			<a class="btn" href="viewTraining.php?<?php echo "id=$trainingID"; ?>">
+				<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor"
+					class="bi bi-arrow-return-left" viewBox="0 0 16 16">
+					<path fill-rule="evenodd"
+						d="M14.5 1.5a.5.5 0 0 1 .5.5v4.8a2.5 2.5 0 0 1-2.5 2.5H2.707l3.347 3.346a.5.5 0 0 1-.708.708l-4.2-4.2a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 8.3H12.5A1.5 1.5 0 0 0 14 6.8V2a.5.5 0 0 1 .5-.5" />
 				</svg>
-      </a>
-    </div>
-  </header>
-	
+			</a>
+		</div>
+	</header>
+
 
 	<div class="container">
-		<h2 class="text-center fw-bold"><?php 
-			require '../processes/db_connection.php';
+		<h2 class="text-center fw-bold"><?php
+		require '../processes/db_connection.php';
 
-			$stmt = $conn->prepare("SELECT * FROM trainings WHERE training_id = ?");
-			$stmt->bind_param('s', $trainingID);
-			$stmt->execute();
-			$result = $stmt->get_result();
-			$data = $result->fetch_assoc();
+		$stmt = $conn->prepare("SELECT * FROM trainings WHERE training_id = ?");
+		$stmt->bind_param('s', $trainingID);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		$data = $result->fetch_assoc();
 
-			$trainingName = $data['training_name'];
-			echo $trainingName; ?>
+		$trainingName = $data['training_name'];
+		echo $trainingName; ?>
 		</h2>
 		<form action="../processes/attendanceProcess.php" method="post">
 			<div class="section">
 				<?php
-					echo "
+				echo "
 						<input type='hidden' value='$trainingID' name='training' id='training'>
 						<input type='hidden' value='$trainingDay' name='days' id='days'>
 						<input type='hidden' value='$trainingInORout' name='inORout' id='inORout'>
 					";
 				?>
 				<p class="text-center">
-					<?php 
-						$scanStatus = $trainingInORout == "in" ? "Login" : "Logout";
-						echo "Day $trainingDay - $scanStatus";
+					<?php
+					$scanStatus = $trainingInORout == "in" ? "Login" : "Logout";
+					echo "Day $trainingDay - $scanStatus";
 					?>
 				</p>
 				<h2 id='status' class="text-center"></h2>

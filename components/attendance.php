@@ -1,5 +1,5 @@
 <?php
-  include '../processes/db_connection.php';
+include '../processes/db_connection.php';
 ?>
 <div class="container d-flex flex-column justify-content-center align-items-center text-center mb-3">
   <h4><?php echo $trainingName; ?></h4>
@@ -34,29 +34,29 @@
   // Set the calculated height to the element
   element.style.height = heightFromTop + "px";
 
-  $(document).ready(function(){
-  // Function to fetch and display data from the server
-  var trainingID = <?php echo json_encode($trainingID); ?>;
-  var day = <?php echo json_encode($day); ?>;
+  $(document).ready(function () {
+    // Function to fetch and display data from the server
+    var trainingID = <?php echo json_encode($trainingID); ?>;
+    var day = <?php echo json_encode($day); ?>;
 
-  function fetchData() {
+    function fetchData() {
       $.ajax({
-          url: '../processes/fetchAttendance.php',
-          type: 'GET',
-          data:{
-              id: trainingID, 
-              days: day
-          },
-          success: function(data) {
-              $('#attendance-table').html(data);
-          }
+        url: '../processes/fetchAttendance.php',
+        type: 'GET',
+        data: {
+          id: trainingID,
+          days: day
+        },
+        success: function (data) {
+          $('#attendance-table').html(data);
+        }
       });
-  }
-  
-  // Initial fetch
-  fetchData();
-  
-  // Set interval to fetch data every 1 seconds
-  setInterval(fetchData, 1000);
-});
+    }
+
+    // Initial fetch
+    fetchData();
+
+    // Set interval to fetch data every 1 seconds
+    setInterval(fetchData, 1000);
+  });
 </script>
