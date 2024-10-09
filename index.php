@@ -29,7 +29,7 @@ if (isset($_SESSION['username'])) {
 <body>
     <form id="login-form" action="processes/login-process.php" method="post">
         <div class="csc-logo">
-
+            <img src="src/img/csc-logo.png" alt="" style="width: 70%; height: 70%;">
         </div>
         <?php
         if (isset($_GET['error'])) {

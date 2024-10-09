@@ -30,6 +30,35 @@ if ($_SERVER["REQUEST_METHOD"] == 'POST') {
 	$trainingDay = $_SESSION['days'];
 	$trainingInORout = $_SESSION['inORout'];
 }
+
+$trainingTable = "training-$trainingID-$trainingDay";
+
+$getParticipantStmt = $conn->prepare("SELECT * FROM `$trainingTable`");
+
+if ($getParticipantStmt->execute()) {
+	$getParticipantResult = $getParticipantStmt->get_result();
+	if ($getParticipantResult->num_rows > 0) {
+
+		$attendanceData = [];
+
+		while ($getParticipantData = $getParticipantResult->fetch_assoc()) {
+			$numID = $getParticipantData['participant_id'];
+			$name = "{$getParticipantData['firstname']} {$getParticipantData['middle_initial']} {$getParticipantData['lastname']}";
+
+			$attendanceData[] = [
+				'numID' => $numID,
+				'name' => $name,
+				'timestamp' => "00:00:00"
+			];
+
+		}
+
+	} else {
+		echo "No participants";
+	}
+} else {
+	echo $getParticipantStmt->error;
+}
 ?>
 <html lang="en">
 
@@ -85,6 +114,21 @@ if ($_SERVER["REQUEST_METHOD"] == 'POST') {
 			height: 100px !important;
 		}
 
+		#my-qr-reader video {
+			width: 50% !important;
+			/* Set the width to 50% of the parent container */
+			/* height: 50% !important; */
+			/* Set the height to 50% of the viewport height */
+			max-width: 400px !important;
+			/* Set the maximum width to 400px */
+			max-height: 400px !important;
+			/* Set the maximum height to 300px */
+			margin: 0 auto !important;
+			/* Center the video horizontally */
+			aspect-ratio: 1/1 !important;
+			object-fit: cover !important;
+		}
+
 		button {
 			padding: 10px 20px;
 			border: 1px solid #b2b2b2;
@@ -112,6 +156,16 @@ if ($_SERVER["REQUEST_METHOD"] == 'POST') {
 			width: 100% !important;
 			border: 1px solid #b2b2b2 !important;
 			border-radius: 0.25em;
+		}
+
+		td {
+			border: 1px solid black;
+			padding: 10px;
+			cursor: pointer;
+		}
+
+		td:hover {
+			background-color: #f0f0f0;
 		}
 	</style>
 </head>
@@ -153,7 +207,7 @@ if ($_SERVER["REQUEST_METHOD"] == 'POST') {
 		$trainingName = $data['training_name'];
 		echo $trainingName; ?>
 		</h2>
-		<form action="../processes/attendanceProcess.php" method="post">
+		<div>
 			<div class="section">
 				<?php
 				echo "
@@ -171,17 +225,245 @@ if ($_SERVER["REQUEST_METHOD"] == 'POST') {
 				<h2 id='status' class="text-center"></h2>
 				<div id="my-qr-reader">
 				</div><br>
-				<div class="scanResult">
+				<table id="recorded" style="width: 100%; max-height: 2em;">
+					<tr style="overflow: scroll;">
+
+					</tr>
+				</table>
+
+				<div style="display: flex; gap: 1em; width: 100%; justify-content: center; align-items: center;">
+					<button onclick="clearData()">Clear Data</button><button onclick="saveData()">Save to Server</button>
+				</div>
+				<!-- <div class="scanResult">
 					<h3><label for="name-result" id="name-label"></label></h3>
 					<input type="hidden" name="name-result" id="name-result"><br>
 					<input type="submit" value="Save" id="saveButton" style="display: none;">
-				</div>
+				</div> -->
 			</div>
-		</form>
+		</div>
+
+
 	</div>
 	<script src="../script/html5-qrcode.min.js"></script>
-	<script src="../script/main-script.js"></script>
 	<script src="../script/crypto-js.min.js"></script>
+	<script src="../script/jquery-3.6.0.min.js"></script>
+
+	<script>
+		let qrCodeScanned = false;
+		let previousData = "";
+		setStatus("ready");
+
+		const existingData = localStorage.getItem("attendance-<?php echo $trainingID; ?>-<?php echo $trainingInORout; ?>-<?php echo $trainingDay; ?>");
+		var recordedData = [];
+
+		if (existingData) {
+			try {
+				recordedData = JSON.parse(existingData);
+
+				recordedData.forEach(participant => {
+					addRow(participant.numID, participant.name, participant.timestamp);
+				});
+			} catch (error) {
+				alert('Failed to parse existing data:', e);
+				recordedData = [];
+			}
+		} else {
+			console.log("None");
+		}
+
+		var attendanceData = JSON.parse('<?php echo json_encode($attendanceData); ?>');
+
+		function domReady(fn) {
+			if (
+				document.readyState === "complete" ||
+				document.readyState === "interactive"
+			) {
+				setTimeout(fn, 1000);
+			} else {
+				document.addEventListener("DOMContentLoaded", fn);
+			}
+		}
+
+		let htmlscanner = new Html5QrcodeScanner(
+			"my-qr-reader",
+			{ fps: 50, qrbos: 250 }
+		);
+
+		function setStatus(status) {
+			const statusElement = document.getElementById('status');
+
+			switch (status) {
+				case "ready":
+					statusElement.innerHTML = 'Ready to Scan!';
+					break;
+				case "decrypting":
+					statusElement.innerHTML = 'Decrypting data...';
+					break;
+				case "recording":
+					statusElement.innerHTML = 'Recording data...';
+					break;
+				default:
+					statusElement.innerHTML = 'Error. Refresh the page.';
+					break;
+			}
+		}
+
+		domReady(function () {
+			// If found you qr code
+
+			async function onScanSuccess(decodeText, decodeResult) {
+				// alert("Scanned data: "+decodeText);
+				if (!qrCodeScanned) { // Check if QR code has already been scanned
+					qrCodeScanned = true;
+
+					// alert(previousData + " -- "+ decodeText);
+
+					if (previousData === decodeText) {
+						qrCodeScanned = false;
+						return;
+					}
+					else {
+						previousData = decodeText;
+						setStatus("decrypting");
+
+						decodeText
+
+						addAttendance(decodeText.split("::")[1]);
+
+						setStatus("ready");
+						qrCodeScanned = false;
+					}
+
+				}
+			}
+
+			// if (counter === 0){
+			// 	counter++;
+			// 	htmlscanner.render(onScanSuccess);
+			// }
+
+			// counter++;
+			htmlscanner.render(onScanSuccess);
+		});
+
+		function addAttendance(numID) {
+			console.log(numID);
+			const participant = attendanceData.find(participant => participant.numID === parseInt(numID, 10));
+			if (participant) {
+				const now = new Date();
+
+				// Get the current hour, minute, and second
+				const hours = now.getHours();
+				const minutes = now.getMinutes();
+				const seconds = now.getSeconds();
+
+				participant.timestamp = `${hours}:${minutes}:${seconds}`;
+
+				saveRecordedData(participant.numID, participant.name, participant.timestamp);
+			} else {
+				console.log("Not found");
+			}
+		}
+
+		function deleteLastData() {
+			document.getElementById("recorded").innerHTML = "<tr></tr>";
+			recordedData.pop();
+			localStorage.setItem("attendance-<?php echo $trainingID; ?>-<?php echo $trainingInORout; ?>-<?php echo $trainingDay; ?>", JSON.stringify(recordedData));
+			recordedData.forEach(participant => {
+				addRow(participant.numID, participant.name, participant.timestamp);
+			});
+		}
+
+		function addRow(id, name, timestamp) {
+			const tbody = document.querySelector('#recorded tbody');
+			const newRow = document.createElement('tr');
+
+			const idCell = document.createElement('td');
+			idCell.textContent = id;
+			newRow.appendChild(idCell);
+
+			const nameCell = document.createElement('td');
+			nameCell.textContent = name;
+			newRow.appendChild(nameCell);
+
+			const timestampCell = document.createElement('td');
+			timestampCell.textContent = timestamp;
+			newRow.appendChild(timestampCell);
+
+			const firstRow = tbody.firstChild; // Get the first row
+			tbody.insertBefore(newRow, firstRow);
+		}
+
+		function saveRecordedData(id, name, timestamp) {
+			const newData = { numID: id, name: name, timestamp: timestamp };
+
+			const dataExists = recordedData.find(participant => participant.numID === parseInt(id, 10));
+
+			if (dataExists) {
+				const updatedDataArray = recordedData.filter(item => item.numID !== parseInt(id, 10));
+				recordedData = updatedDataArray;
+			}
+
+			document.getElementById("recorded").innerHTML = "<tr></tr>";
+			recordedData.push(newData);
+			recordedData.forEach(participant => {
+				addRow(participant.numID, participant.name, participant.timestamp);
+			});
+			localStorage.setItem("attendance-<?php echo $trainingID; ?>-<?php echo $trainingInORout; ?>-<?php echo $trainingDay; ?>", JSON.stringify(recordedData));
+
+		}
+
+		function saveDatabase() {
+			const data = JSON.stringify(recordedData);
+			const blob = new Blob([data], { type: 'application/json' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = 'attendance.json';
+			a.click();
+			URL.revokeObjectURL(url);
+		}
+
+		function saveData() {
+			const trainingID = "<?php echo $trainingID; ?>";
+			const trainingDay = "<?php echo $trainingDay; ?>";
+			const inorout = "<?php echo $trainingInORout; ?>";
+
+			$.ajax({
+				url: '../processes/saveRecordedData.php',
+				type: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify({
+					inorout: inorout,
+					trainingID: trainingID,
+					day: trainingDay,
+					participants: recordedData
+				}),
+				success: function (response) {
+					if (response) {
+						document.getElementById("recorded").innerHTML = "<tr></tr>";
+						recordedData = [];
+						localStorage.setItem("attendance-<?php echo $trainingID; ?>-<?php echo $trainingInORout; ?>-<?php echo $trainingDay; ?>", JSON.stringify(recordedData));
+					}
+				},
+				error: function (xhr, status, error) {
+					alert('Error:', error);
+				}
+			});
+		}
+
+		function clearData() {
+
+			const confirmDelete = confirm("Are you sure you want to DELETE ALL DATA?");
+
+			if (confirmDelete) {
+				document.getElementById("recorded").innerHTML = "<tr></tr>";
+				recordedData = [];
+				localStorage.setItem("attendance-<?php echo $trainingID; ?>-<?php echo $trainingInORout; ?>-<?php echo $trainingDay; ?>", JSON.stringify(recordedData));
+			}
+
+		}
+	</script>
 </body>
 
 </html>

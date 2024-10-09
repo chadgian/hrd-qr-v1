@@ -41,9 +41,9 @@ body {
     background-color: white;
     margin-bottom: 1em;
     border-radius: 50%;
-    background-image: url('../src/img/csc-logo.png');
-    background-size: cover;
-    background-position: center;
+    /* background-image: url('../src/img/csc-logo.png');
+    background-size: 90%;
+    background-position: center; */
     box-shadow: 0px 5px 5px rgba(5, 5, 5, 0.2);
 }
 
